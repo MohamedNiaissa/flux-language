@@ -2,8 +2,7 @@
  * Recursive descent parser for the Flux language.
  *
  * Each grammar rule maps to a parse_* method that consumes tokens and returns
- * an AST node — same approach as the toy-language parser but adapted to
- * Flux's pipeline-oriented syntax.
+ * an AST node, adapted to Flux's pipeline-oriented syntax.
  *
  * Parsing a full program example:
  *
@@ -315,7 +314,7 @@ class Parser {
   // ─── Helpers ─────────────────────────────────────────────────────────────────
 
   /**
-   * Factorises left-associative binary parsing (same pattern as toy-language).
+   * Factorises left-associative binary parsing.
    * @param {() => *}        operandFn
    * @param {string[]}       operators  — TokenType values
    */
