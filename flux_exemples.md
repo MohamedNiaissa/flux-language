@@ -2,15 +2,9 @@
 
 ---
 
-## source fichier
-
-// lire un fichier csv local
-source fichier("produits.csv")
-     puis affiche;
-
----
-
 ## source api
+source api("https://jsonplaceholder.typicode.com/users")
+puis affiche;
 
 // récupérer des données depuis une API
 source api("https://api.exemple.com/utilisateurs")
@@ -18,18 +12,10 @@ source api("https://api.exemple.com/utilisateurs")
 
 ---
 
-## source liste
-
-// travailler sur une liste définie en dur
-source liste([340, 12, 89, 450, 23, 167])
-     puis affiche;
-
----
-
 ## puis extrait
 
-// garder uniquement certaines colonnes d'un fichier
-source fichier("employes.csv")
+// garder uniquement certaines colonnes
+source api("https://api.exemple.com/employes")
      puis extrait [nom, salaire, ville]
      puis affiche;
 
@@ -38,7 +24,7 @@ source fichier("employes.csv")
 ## puis filtre
 
 // garder uniquement les lignes qui satisfont une condition
-source fichier("produits.csv")
+source api("https://api.exemple.com/produits")
      puis filtre prix < 50
      puis affiche;
 
@@ -47,7 +33,7 @@ source fichier("produits.csv")
 ## puis filtre avec et
 
 // combiner deux conditions
-source fichier("clients.csv")
+source api("https://api.exemple.com/clients")
      puis filtre age >= 18 et abonne == vrai
      puis affiche;
 
@@ -56,7 +42,7 @@ source fichier("clients.csv")
 ## puis filtre avec ou
 
 // garder les lignes qui satisfont au moins une condition
-source fichier("stocks.csv")
+source api("https://api.exemple.com/stocks")
      puis filtre ville == "Paris" ou ville == "Lyon"
      puis affiche;
 
@@ -65,7 +51,7 @@ source fichier("stocks.csv")
 ## puis transforme
 
 // modifier une valeur sur chaque ligne
-source fichier("catalogue.csv")
+source api("https://api.exemple.com/catalogue")
      puis transforme prix est prix * 1.2
      puis affiche;
 
@@ -74,25 +60,16 @@ source fichier("catalogue.csv")
 ## puis transforme (plusieurs fois)
 
 // enchaîner plusieurs modifications
-source fichier("ventes.csv")
+source api("https://api.exemple.com/ventes")
      puis transforme montant est montant * 0.9
      puis transforme devise est "EUR"
      puis affiche;
 
 ---
 
-## puis affiche
-
-// afficher le résultat dans la console
-source liste([12, 28, 5, 33, 19, 41])
-     puis filtre valeur > 20
-     puis affiche;
-
----
-
 ## puis sauvegarde
 
-// écrire le résultat dans un fichier
+// écrire le résultat dans un fichier JSON
 source api("https://api.exemple.com/meteo")
      puis extrait [ville, temperature, date]
      puis sauvegarde "meteo.json";
@@ -102,7 +79,7 @@ source api("https://api.exemple.com/meteo")
 ## puis filtre avec !=
 
 // garder les commandes qui ne sont pas annulées
-source fichier("commandes.csv")
+source api("https://api.exemple.com/commandes")
      puis filtre statut != "annulée"
      puis affiche;
 
@@ -111,11 +88,11 @@ source fichier("commandes.csv")
 ## vrai / faux
 
 // filtrer sur un booléen
-source fichier("comptes.csv")
+source api("https://api.exemple.com/comptes")
      puis filtre actif == vrai
      puis affiche;
 
-source fichier("comptes.csv")
+source api("https://api.exemple.com/comptes")
      puis filtre bloque == faux
      puis affiche;
 
@@ -131,15 +108,13 @@ pipeline traiter_commandes debut
      puis sauvegarde "commandes_traitees.json";
 fin
 
-source fichier("commandes_janvier.csv") | traiter_commandes;
-source fichier("commandes_fevrier.csv") | traiter_commandes;
+source api("https://api.exemple.com/commandes_janvier") | traiter_commandes;
+source api("https://api.exemple.com/commandes_fevrier") | traiter_commandes;
 
 ---
 
 ## Exemple complet — tous les mots-clés ensemble
 
-// traitement complet d'un fichier de ventes API
-// extrait, filtre, transforme, sauvegarde
 source api("https://api.exemple.com/ventes")
      puis extrait [vendeur, produit, montant, region, valide]
      puis filtre valide == vrai et montant > 0

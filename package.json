@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "node --test src/flux/tests/lexer.test.js src/flux/tests/parser.test.js",
+    "test": "node --test src/flux/tests/lexer.test.js src/flux/tests/parser.test.js src/flux/tests/interpreter.test.js",
     "start": "nodemon server.js"
   },
   "author": "",

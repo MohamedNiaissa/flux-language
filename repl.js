@@ -1,12 +1,17 @@
 const readline = require('readline')
-const { Lexer } = require('./src/flux/lexer')
-const { Parser } = require('./src/flux/parser')
+const { Lexer }       = require('./src/flux/lexer')
+const { Parser }      = require('./src/flux/parser')
+const { Interpreter } = require('./src/flux/interpreter')
 
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
     prompt: '>>> '
 })
+
+// One interpreter instance persists across REPL sessions so pipeline
+// declarations remain available after they are defined.
+const interpreter = new Interpreter()
 
 // Accumulate lines until the statement is complete.
 // A statement ends with ';' (source) or 'fin' (pipeline declaration).
@@ -17,13 +22,13 @@ function isComplete(lines) {
     return joined.endsWith(';') || /\bfin\s*$/.test(joined)
 }
 
-function runBuffer() {
+async function runBuffer() {
     const source = buffer.join('\n')
     buffer = []
     try {
         const tokens = new Lexer(source).tokenize()
         const ast    = new Parser(tokens).parse()
-        console.log(JSON.stringify(ast, null, 2))
+        await interpreter.interpret(ast)
     } catch (e) {
         console.error(e.message)
     }
@@ -43,8 +48,8 @@ rl.on('line', (line) => {
     if (trimmed) buffer.push(trimmed)
 
     if (buffer.length > 0 && isComplete(buffer)) {
-        runBuffer()
-        rl.prompt()
+        runBuffer().then(() => rl.prompt())
+        return
     } else {
         // Still inside a multi-line statement — show continuation prompt
         rl.setPrompt('... ')
