@@ -76,11 +76,9 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       # 1. Write the private key to a temp file
-      # 2. Lock it down to owner-read-only (SSH requirement)
-      # 3. Pre-accept the VPS host key so no interactive prompt blocks the run
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh/
