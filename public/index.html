@@ -14,9 +14,6 @@
       <span class="logo">flux</span>
       <span class="tagline">Un langage de pipeline de données</span>
     </div>
-    <a class="github-link" href="https://github.com/mohamedamara1/flux-language" target="_blank" rel="noopener">
-      GitHub ↗
-    </a>
   </header>
 
   <nav class="tabs">
@@ -29,7 +26,40 @@
 
   <main class="workspace">
     <div class="editor-pane">
-      <div class="pane-label">Code</div>
+      <div class="pane-label">
+        Code
+        <div class="info-icon" tabindex="0">
+          ℹ
+          <div class="info-tooltip">
+            <div class="tooltip-section">
+              <div class="tooltip-title">Comparaison</div>
+              <div class="tooltip-row"><code>==</code><span>est égal à</span></div>
+              <div class="tooltip-row"><code>!=</code><span>est différent de</span></div>
+              <div class="tooltip-row"><code>&lt;</code><span>est inférieur à</span></div>
+              <div class="tooltip-row"><code>&lt;=</code><span>est inférieur ou égal à</span></div>
+              <div class="tooltip-row"><code>&gt;</code><span>est supérieur à</span></div>
+              <div class="tooltip-row"><code>&gt;=</code><span>est supérieur ou égal à</span></div>
+            </div>
+            <div class="tooltip-section">
+              <div class="tooltip-title">Logique</div>
+              <div class="tooltip-row"><code>et</code><span>les deux conditions vraies</span></div>
+              <div class="tooltip-row"><code>ou</code><span>au moins une condition vraie</span></div>
+            </div>
+            <div class="tooltip-section">
+              <div class="tooltip-title">Arithmétique</div>
+              <div class="tooltip-row"><code>+</code><span>addition</span></div>
+              <div class="tooltip-row"><code>-</code><span>soustraction</span></div>
+              <div class="tooltip-row"><code>*</code><span>multiplication</span></div>
+              <div class="tooltip-row"><code>/</code><span>division</span></div>
+            </div>
+            <div class="tooltip-section">
+              <div class="tooltip-title">Booléens</div>
+              <div class="tooltip-row"><code>vrai</code><span>true</span></div>
+              <div class="tooltip-row"><code>faux</code><span>false</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div id="editor"></div>
       <div class="editor-footer">
         <span class="hint">Ctrl + Entrée pour exécuter</span>
