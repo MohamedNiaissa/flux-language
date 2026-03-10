@@ -1,7 +1,13 @@
 const http = require('http')
 const express = require('express')
+const { Lexer }       = require('./src/flux/lexer')
+const { Parser }      = require('./src/flux/parser')
+const { Interpreter } = require('./src/flux/interpreter')
+
 const app = express()
 
+app.use(express.json())
+app.use(express.static('public'))
 const normalizePort = val => {
     const port = parseInt(val, 10);
 
@@ -50,8 +56,25 @@ server.on('listening', () => {
     console.log('Listening on ' + bind);
 });
 
-app.get('/', (req, res) => {
-    res.send('Hello World!')
+app.post('/api/run', async (req, res, next) => {
+    try {
+        const { code } = req.body
+        if (!code || typeof code !== 'string') {
+            return res.status(400).json({ error: 'Paramètre code manquant.' })
+        }
+        const lines = []
+        const interpreter = new Interpreter({ print: (line) => lines.push(line) })
+        const tokens = new Lexer(code).tokenize()
+        const ast    = new Parser(tokens).parse()
+        await interpreter.interpret(ast)
+        res.json({ output: lines.join('\n') })
+    } catch (err) {
+        next(err)
+    }
+})
+
+app.use((err, req, res, next) => {
+    res.status(400).json({ error: err.message })
 })
 
 server.listen(port);

@@ -55,14 +55,14 @@ class Lexer {
         if (this.match('=')) {
           this.addToken(TokenType.EQUAL_EQUAL);
         } else {
-          throw new SyntaxError(`Unexpected character '=' at line ${this.line}`);
+          throw new SyntaxError(`Caractère inattendu '=' à la ligne ${this.line} — utilisez '==' pour comparer`);
         }
         break;
       case '!':
         if (this.match('=')) {
           this.addToken(TokenType.BANG_EQUAL);
         } else {
-          throw new SyntaxError(`Unexpected character '!' at line ${this.line}`);
+          throw new SyntaxError(`Caractère inattendu '!' à la ligne ${this.line} — utilisez '!=' pour la différence`);
         }
         break;
 
@@ -87,7 +87,7 @@ class Lexer {
           this.identifier();
         } else {
           throw new SyntaxError(
-            `Unexpected character '${c}' at line ${this.line}`
+            `Caractère inattendu '${c}' à la ligne ${this.line}`
           );
         }
     }
@@ -100,7 +100,7 @@ class Lexer {
     }
 
     if (this.isAtEnd()) {
-      throw new SyntaxError(`Unterminated string at line ${this.line}`);
+      throw new SyntaxError(`Chaîne de caractères non fermée à la ligne ${this.line} — ajoutez un guillemet fermant "`);
     }
 
     this.advance(); // closing "

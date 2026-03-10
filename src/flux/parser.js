@@ -66,7 +66,7 @@ class Parser {
     if (this.match(TokenType.SOURCE))   return this.parseSourceStatement();
 
     throw new SyntaxError(
-      `Unexpected token '${this.peek().lexeme}' at line ${this.peek().line}`
+      `Instruction inconnue '${this.peek().lexeme}' à la ligne ${this.peek().line} — commencez par 'source' ou 'pipeline'`
     );
   }
 
@@ -78,8 +78,8 @@ class Parser {
    * fin
    */
   parsePipelineDeclaration() {
-    const name = this.consume(TokenType.IDENTIFIER, "Expect pipeline name after 'pipeline'");
-    this.consume(TokenType.DEBUT, "Expect 'debut' after pipeline name");
+    const name = this.consume(TokenType.IDENTIFIER, "Nom de pipeline attendu après 'pipeline'");
+    this.consume(TokenType.DEBUT, "Mot-clé 'debut' attendu après le nom du pipeline");
 
     const steps = this.parseSteps();
 
@@ -87,7 +87,7 @@ class Parser {
     // (mirrors the style shown in flux_exemples.md)
     this.match(TokenType.SEMICOLON);
 
-    this.consume(TokenType.FIN, "Expect 'fin' to close pipeline body");
+    this.consume(TokenType.FIN, "Mot-clé 'fin' attendu pour fermer le pipeline");
     return new PipelineDeclaration(name, steps);
   }
 
@@ -99,19 +99,19 @@ class Parser {
    * source fichier("commandes.csv") | traiter_commandes;
    */
   parseSourceStatement() {
-    const connector = this.consume(TokenType.IDENTIFIER, "Expect source connector after 'source'");
-    this.consume(TokenType.LPAREN, "Expect '(' after source connector");
+    const connector = this.consume(TokenType.IDENTIFIER, "Connecteur attendu après 'source' — ex : source api(\"url\")");
+    this.consume(TokenType.LPAREN, "Parenthèse ouvrante '(' attendue après le connecteur");
     const arg = this.parseSourceArg();
-    this.consume(TokenType.RPAREN, "Expect ')' after source argument");
+    this.consume(TokenType.RPAREN, "Parenthèse fermante ')' attendue après l'argument");
 
     const steps = this.parseSteps();
 
     let pipeTarget = null;
     if (this.match(TokenType.PIPE)) {
-      pipeTarget = this.consume(TokenType.IDENTIFIER, "Expect pipeline name after '|'");
+      pipeTarget = this.consume(TokenType.IDENTIFIER, "Nom de pipeline attendu après '|'");
     }
 
-    this.consume(TokenType.SEMICOLON, "Expect ';' at end of source statement");
+    this.consume(TokenType.SEMICOLON, "Point-virgule ';' attendu en fin d'instruction");
     return new SourceStatement(connector, arg, steps, pipeTarget);
   }
 
@@ -131,7 +131,7 @@ class Parser {
     }
 
     throw new SyntaxError(
-      `Expect source argument (string or list) at line ${this.peek().line}`
+      `Argument de source attendu (une URL entre guillemets) à la ligne ${this.peek().line}`
     );
   }
 
@@ -146,7 +146,7 @@ class Parser {
       }
     }
 
-    this.consume(TokenType.RBRACKET, "Expect ']' after list elements");
+    this.consume(TokenType.RBRACKET, "Crochet fermant ']' attendu après les éléments de la liste");
     return new ListLiteral(elements);
   }
 
@@ -176,21 +176,21 @@ class Parser {
     if (this.match(TokenType.SAUVEGARDE)) return this.parseSave();
 
     throw new SyntaxError(
-      `Expect operation keyword after 'puis' at line ${this.peek().line}`
+      `Opération attendue après 'puis' à la ligne ${this.peek().line} — utilisez : extrait, filtre, transforme, affiche ou sauvegarde`
     );
   }
 
   /** puis extrait [nom, salaire, ville] */
   parseExtract() {
-    this.consume(TokenType.LBRACKET, "Expect '[' after 'extrait'");
+    this.consume(TokenType.LBRACKET, "Crochet ouvrant '[' attendu après 'extrait'");
 
     const fields = [];
-    fields.push(this.consume(TokenType.IDENTIFIER, "Expect field name in extrait list"));
+    fields.push(this.consume(TokenType.IDENTIFIER, "Nom de champ attendu dans la liste de 'extrait'"));
     while (this.match(TokenType.COMMA)) {
-      fields.push(this.consume(TokenType.IDENTIFIER, "Expect field name after ','"));
+      fields.push(this.consume(TokenType.IDENTIFIER, "Nom de champ attendu après la virgule"));
     }
 
-    this.consume(TokenType.RBRACKET, "Expect ']' after extrait field list");
+    this.consume(TokenType.RBRACKET, "Crochet fermant ']' attendu après la liste de champs de 'extrait'");
     return new ExtractStep(fields);
   }
 
@@ -201,15 +201,15 @@ class Parser {
 
   /** puis transforme field est expression */
   parseTransform() {
-    const field = this.consume(TokenType.IDENTIFIER, "Expect field name after 'transforme'");
-    this.consume(TokenType.EST, "Expect 'est' after field name in transforme");
+    const field = this.consume(TokenType.IDENTIFIER, "Nom de champ attendu après 'transforme'");
+    this.consume(TokenType.EST, "Mot-clé 'est' attendu après le nom du champ dans 'transforme'");
     const expression = this.parseExpression();
     return new TransformStep(field, expression);
   }
 
   /** puis sauvegarde "filename" */
   parseSave() {
-    const filename = this.consume(TokenType.STRING, "Expect filename string after 'sauvegarde'");
+    const filename = this.consume(TokenType.STRING, "Nom de fichier entre guillemets attendu après 'sauvegarde'");
     return new SaveStep(filename);
   }
 
@@ -237,7 +237,7 @@ class Parser {
    * compOp     → == | != | < | <= | > | >=
    */
   parseComparison() {
-    const field    = this.consume(TokenType.IDENTIFIER, "Expect field name in condition");
+    const field    = this.consume(TokenType.IDENTIFIER, "Nom de champ attendu dans la condition");
     const operator = this.consumeComparisonOp();
     const right    = this.parsePrimary();
     return new Comparison(field, operator, right);
@@ -256,7 +256,7 @@ class Parser {
       if (this.match(op)) return this.previous();
     }
     throw new SyntaxError(
-      `Expect comparison operator (==, !=, <, <=, >, >=) at line ${this.peek().line}`
+      `Opérateur de comparaison attendu à la ligne ${this.peek().line} — utilisez : ==, !=, <, <=, >, >=`
     );
   }
 
@@ -307,7 +307,7 @@ class Parser {
     }
 
     throw new SyntaxError(
-      `Unexpected token '${this.peek().lexeme}' at line ${this.peek().line}`
+      `Valeur inattendue '${this.peek().lexeme}' à la ligne ${this.peek().line}`
     );
   }
 
@@ -345,7 +345,7 @@ class Parser {
 
   consume(type, message) {
     if (this.check(type)) return this.advance();
-    throw new SyntaxError(`${message} at line ${this.peek().line}`);
+    throw new SyntaxError(`${message} (ligne ${this.peek().line})`);
   }
 }
 

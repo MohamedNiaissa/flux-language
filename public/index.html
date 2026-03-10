@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flux — Playground</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <span class="logo">flux</span>
+      <span class="tagline">Un langage de pipeline de données</span>
+    </div>
+    <a class="github-link" href="https://github.com/mohamedamara1/flux-language" target="_blank" rel="noopener">
+      GitHub ↗
+    </a>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-example="utilisateurs">Utilisateurs</button>
+    <button class="tab" data-example="filtre">Filtre</button>
+    <button class="tab" data-example="transforme">Transforme</button>
+    <button class="tab" data-example="pipeline">Pipeline</button>
+    <button class="tab libre" data-example="libre">Libre ✦</button>
+  </nav>
+
+  <main class="workspace">
+    <div class="editor-pane">
+      <div class="pane-label">Code</div>
+      <div id="editor"></div>
+      <div class="editor-footer">
+        <span class="hint">Ctrl + Entrée pour exécuter</span>
+        <button id="run-btn">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2.5l10 5.5-10 5.5V2.5z"/></svg>
+          Exécuter
+        </button>
+      </div>
+    </div>
+
+    <div class="output-pane">
+      <div class="pane-label">
+        Résultat
+        <span id="output-status"></span>
+      </div>
+      <pre id="output"><span class="placeholder">L'output apparaîtra ici…</span></pre>
+    </div>
+  </main>
+
+  <section class="apis">
+    <span class="apis-label">APIs disponibles</span>
+    <div class="api-cards">
+
+      <div class="api-card" data-url="https://jsonplaceholder.typicode.com/users">
+        <div class="api-name">Utilisateurs</div>
+        <div class="api-fields">id · name · email · phone · website</div>
+        <div class="api-url">jsonplaceholder.typicode.com/users</div>
+        <span class="api-copy">Copier</span>
+      </div>
+
+      <div class="api-card" data-url="https://jsonplaceholder.typicode.com/posts">
+        <div class="api-name">Articles</div>
+        <div class="api-fields">userId · id · title · body</div>
+        <div class="api-url">jsonplaceholder.typicode.com/posts</div>
+        <span class="api-copy">Copier</span>
+      </div>
+
+      <div class="api-card" data-url="https://jsonplaceholder.typicode.com/todos">
+        <div class="api-name">Tâches</div>
+        <div class="api-fields">userId · id · title · completed</div>
+        <div class="api-url">jsonplaceholder.typicode.com/todos</div>
+        <span class="api-copy">Copier</span>
+      </div>
+
+      <div class="api-card" data-url="https://jsonplaceholder.typicode.com/comments">
+        <div class="api-name">Commentaires</div>
+        <div class="api-fields">postId · id · name · email · body</div>
+        <div class="api-url">jsonplaceholder.typicode.com/comments</div>
+        <span class="api-copy">Copier</span>
+      </div>
+
+      <div class="api-card" data-url="https://jsonplaceholder.typicode.com/albums">
+        <div class="api-name">Albums</div>
+        <div class="api-fields">userId · id · title</div>
+        <div class="api-url">jsonplaceholder.typicode.com/albums</div>
+        <span class="api-copy">Copier</span>
+      </div>
+
+    </div>
+  </section>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
