@@ -1,0 +1,152 @@
+{
+  "title": "Flux Language",
+  "uid": "flux-language",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Page Visits / min",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "rate(page_visits_total[5m]) * 60",
+          "legendFormat": "visits/min",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" }
+        }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "area" },
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 1, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] } } }
+    },
+    {
+      "id": 2,
+      "title": "Code Executions / min",
+      "type": "stat",
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "rate(flux_code_executions_total[5m]) * 60",
+          "legendFormat": "executions/min",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" }
+        }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "area" },
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 1, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } } }
+    },
+    {
+      "id": 3,
+      "title": "HTTP Error Rate (4xx+5xx)",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{job=\"flux\", status_code=~\"[45]..\"}[5m])) / sum(rate(http_requests_total{job=\"flux\"}[5m])) * 100",
+          "legendFormat": "error %",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" }
+        }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 1, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 5 }] } } }
+    },
+    {
+      "id": 4,
+      "title": "P95 Response Time",
+      "type": "stat",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"flux\"}[5m])) by (le))",
+          "legendFormat": "p95",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" }
+        }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+      "fieldConfig": { "defaults": { "unit": "s", "decimals": 3, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.5 }, { "color": "red", "value": 1 }] } } }
+    },
+    {
+      "id": 5,
+      "title": "Page Visits Over Time",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(page_visits_total[5m]) * 60",
+          "legendFormat": "visits/min",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" }
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "lineWidth": 2, "fillOpacity": 10 }, "color": { "mode": "palette-classic" } } },
+      "options": { "tooltip": { "mode": "single" }, "legend": { "displayMode": "list", "placement": "bottom" } }
+    },
+    {
+      "id": 6,
+      "title": "Code Executions Over Time",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(flux_code_executions_total{status=\"success\"}[5m]) * 60",
+          "legendFormat": "success/min",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" }
+        },
+        {
+          "expr": "rate(flux_code_executions_total{status=\"error\"}[5m]) * 60",
+          "legendFormat": "error/min",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" }
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "lineWidth": 2, "fillOpacity": 10 }, "color": { "mode": "palette-classic" } } },
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } }
+    },
+    {
+      "id": 7,
+      "title": "HTTP Requests by Route",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum by (route) (rate(http_requests_total{job=\"flux\"}[5m])) * 60",
+          "legendFormat": "{{route}}",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" }
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "lineWidth": 2, "fillOpacity": 10 } } },
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } }
+    },
+    {
+      "id": 8,
+      "title": "Node.js Memory Usage",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "nodejs_heap_size_used_bytes{job=\"flux\"}",
+          "legendFormat": "heap used",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" }
+        },
+        {
+          "expr": "nodejs_heap_size_total_bytes{job=\"flux\"}",
+          "legendFormat": "heap total",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" }
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "bytes", "custom": { "lineWidth": 2, "fillOpacity": 10 } } },
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "hide": 0,
+        "includeAll": false,
+        "current": {}
+      }
+    ]
+  }
+}

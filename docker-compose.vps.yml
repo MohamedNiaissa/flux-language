@@ -3,6 +3,8 @@ services:
     image: "traefik"
     restart: always
     command:
+      - "--api=true"
+      - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
@@ -12,9 +14,14 @@ services:
       - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
       - "--certificatesresolvers.mytlschallenge.acme.email=${SSL_EMAIL}"
       - "--certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addRoutersLabels=true"
+      - "--metrics.prometheus.addServicesLabels=true"
     ports:
       - "80:80"
       - "443:443"
+      - "8080:8080"
     volumes:
       - traefik_data:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -25,12 +32,48 @@ services:
     restart: always
     labels:
       - traefik.enable=true
-      - traefik.http.routers.flux.rule=Host(`${DOMAIN_NAME}`)
+      - traefik.http.routers.flux.rule=Host(`flux.${DOMAIN_NAME}`)
       - traefik.http.routers.flux.tls=true
       - traefik.http.routers.flux.entrypoints=websecure
       - traefik.http.routers.flux.tls.certresolver=mytlschallenge
       - traefik.http.services.flux.loadbalancer.server.port=3000
 
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - "./monitoring/prometheus.yaml:/etc/prometheus/prometheus.yaml"
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_SERVER_ROOT_URL=https://grafana.${DOMAIN_NAME}
+    volumes:
+      - ./Grafana/provisioning/datasources/datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+      - ./Grafana/provisioning/dashboards/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
+      - ./Grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana_data:/var/lib/grafana
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.grafana.rule=Host(`grafana.${DOMAIN_NAME}`)
+      - traefik.http.routers.grafana.tls=true
+      - traefik.http.routers.grafana.entrypoints=websecure
+      - traefik.http.routers.grafana.tls.certresolver=mytlschallenge
+      - traefik.http.services.grafana.loadbalancer.server.port=3000
+    depends_on:
+      - prometheus
+
 volumes:
   traefik_data:
     external: true
+  prometheus_data:
+  grafana_data:

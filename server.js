@@ -1,10 +1,58 @@
 const http = require('http')
 const express = require('express')
+const client = require('prom-client')
 const { Lexer }       = require('./src/flux/lexer')
 const { Parser }      = require('./src/flux/parser')
 const { Interpreter } = require('./src/flux/interpreter')
 
 const app = express()
+
+// --- Prometheus metrics setup ---
+const register = new client.Registry()
+client.collectDefaultMetrics({ register })
+
+const httpRequestsTotal = new client.Counter({
+    name: 'http_requests_total',
+    help: 'Total number of HTTP requests',
+    labelNames: ['method', 'route', 'status_code'],
+    registers: [register],
+})
+
+const httpRequestDurationSeconds = new client.Histogram({
+    name: 'http_request_duration_seconds',
+    help: 'Duration of HTTP requests in seconds',
+    labelNames: ['method', 'route', 'status_code'],
+    buckets: [0.01, 0.05, 0.1, 0.3, 0.5, 1, 2, 5],
+    registers: [register],
+})
+
+const pageVisitsTotal = new client.Counter({
+    name: 'page_visits_total',
+    help: 'Total page visits (GET requests to the website)',
+    registers: [register],
+})
+
+const codeExecutionsTotal = new client.Counter({
+    name: 'flux_code_executions_total',
+    help: 'Total Flux code executions via /api/run',
+    labelNames: ['status'],
+    registers: [register],
+})
+
+// Track request metrics for all routes
+app.use((req, res, next) => {
+    const end = httpRequestDurationSeconds.startTimer()
+    res.on('finish', () => {
+        const route = req.path === '/' ? '/' : req.path.startsWith('/api') ? req.path : '/static'
+        const labels = { method: req.method, route, status_code: res.statusCode }
+        httpRequestsTotal.inc(labels)
+        end(labels)
+        if (req.method === 'GET' && !req.path.startsWith('/api') && !req.path.startsWith('/metrics')) {
+            pageVisitsTotal.inc()
+        }
+    })
+    next()
+})
 
 app.use(express.json())
 app.use(express.static('public'))
@@ -56,6 +104,11 @@ server.on('listening', () => {
     console.log('Listening on ' + bind);
 });
 
+app.get('/metrics', async (req, res) => {
+    res.set('Content-Type', register.contentType)
+    res.end(await register.metrics())
+})
+
 app.post('/api/run', async (req, res, next) => {
     try {
         const { code } = req.body
@@ -67,8 +120,10 @@ app.post('/api/run', async (req, res, next) => {
         const tokens = new Lexer(code).tokenize()
         const ast    = new Parser(tokens).parse()
         await interpreter.interpret(ast)
+        codeExecutionsTotal.inc({ status: 'success' })
         res.json({ output: lines.join('\n') })
     } catch (err) {
+        codeExecutionsTotal.inc({ status: 'error' })
         next(err)
     }
 })

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feat/metrics
   pull_request:
     branches:
       - main
@@ -53,11 +54,12 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ secrets.USERNAME }}/flux-language:latest
+
   # ─── 3. DEPLOY ──────────────────────────────────────────────────────────────
   # Only runs on direct pushes to main (not on pull requests)
   deploy:
     needs: build-and-push
-    if: github.event_name == 'push'
+    # if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
