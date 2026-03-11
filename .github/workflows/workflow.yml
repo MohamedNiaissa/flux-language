@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - deploy
   pull_request:
     branches:
       - main
@@ -57,9 +56,10 @@ jobs:
   # ─── 3. DEPLOY ──────────────────────────────────────────────────────────────
   # Only runs on direct pushes to main (not on pull requests)
   deploy:
-
     needs: build-and-push
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Setup SSH
         run: |
